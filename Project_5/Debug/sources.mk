@@ -20,6 +20,7 @@ drivers \
 source/LED \
 source/Logger \
 source \
+source/RingBuffer \
 source/uCUnit \
 startup \
 utilities \
