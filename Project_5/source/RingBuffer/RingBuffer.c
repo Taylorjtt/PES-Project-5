@@ -36,6 +36,10 @@ BUFFER_ERROR RingBuffer_push(RingBufferHandle handle, uint8_t data)
 		START_CRITICAL;
 		*(obj->head) = data;
 		obj->head++;
+		if(obj->head >= obj->buffer + obj->length)
+		{
+			obj->head = obj->buffer;
+		}
 		obj->count++;
 		END_CRITICAL;
 		return NO_ERROR;
@@ -44,17 +48,18 @@ BUFFER_ERROR RingBuffer_push(RingBufferHandle handle, uint8_t data)
 	{
 
 		START_CRITICAL;
-		//calculate offsets from the buffer
-		size_t headOffset = obj->head - obj->buffer;
-		size_t tailOffset = obj->tail - obj->buffer;
-		//reallocate buffer
+
 		obj->buffer = realloc(obj->buffer,sizeof(obj->buffer)*2);
 		//set the head and tail based on offsets
-		obj->head = obj->buffer + headOffset;
-		obj->tail = obj->buffer + tailOffset;
+		obj->head = obj->buffer + obj->length + 1;
+		obj->tail = obj->buffer + obj->length;
 		obj->length = obj->length * 2;
 		*(obj->head) = data;
 		obj->head++;
+		if(obj->head >= obj->buffer + obj->length)
+		{
+			obj->head = obj->buffer;
+		}
 		obj->count++;
 		END_CRITICAL;
 		return BUFFER_FULL_ERROR;
@@ -67,7 +72,12 @@ BUFFER_ERROR RingBuffer_pop(RingBufferHandle handle)
 	if(!RingBuffer_isEmpty(handle))
 	{
 		START_CRITICAL;
+
 		obj->tail++;
+		if(obj->tail >= obj->buffer + obj->length)
+		{
+			obj->tail = obj->buffer;
+		}
 		obj->count--;
 		END_CRITICAL;
 		return NO_ERROR;

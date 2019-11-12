@@ -32,6 +32,15 @@ void testRingBuffer(void)
 	UCUNIT_CheckIsEqual(BUFFER_EMPTY_ERROR,RingBuffer_pop(ring));
 	UCUNIT_CheckIsEqual(BUFFER_EMPTY_ERROR,RingBuffer_peek(ring));
 
+	for(int i = 0; i < 5; i++)
+	{
+		UCUNIT_CheckIsEqual(RingBuffer_push(ring, i),NO_ERROR);
+		UCUNIT_CheckIsEqual(RingBuffer_peek(ring),i);
+		UCUNIT_CheckIsEqual(RingBuffer_pop(ring),NO_ERROR);
+	}
+
+	UCUNIT_CheckIsEqual(RingBuffer_pop(ring),BUFFER_EMPTY_ERROR);
+
 	for(int i = 0; i < 3; i++)
 	{
 		UCUNIT_CheckIsEqual(RingBuffer_push(ring, i),NO_ERROR);
@@ -45,7 +54,13 @@ void testRingBuffer(void)
 		UCUNIT_CheckIsEqual(RingBuffer_peek(ring),i);
 		UCUNIT_CheckIsEqual(RingBuffer_pop(ring),NO_ERROR);
 	}
+
 	UCUNIT_CheckIsEqual(RingBuffer_pop(ring),BUFFER_EMPTY_ERROR);
+
+	for(int i = 0; i < 20; i++)
+	{
+		RingBuffer_push(ring, i);
+	}
 
 
 	UCUNIT_TestcaseEnd();
