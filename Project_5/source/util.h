@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #define EnableInterrupts asm(" CPSIE i");
 #define DisableInterrupts asm(" CPSID i");
+#define START_CRITICAL DisableInterrupts
+#define END_CRITICAL EnableInterrupts
 extern uint32_t usecs;
 void delayMilliseconds(uint32_t delay);
 #endif /* UTIL_H_ */

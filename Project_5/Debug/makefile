@@ -11,6 +11,7 @@ RM := rm -rf
 -include utilities/subdir.mk
 -include startup/subdir.mk
 -include source/uCUnit/subdir.mk
+-include source/Test/subdir.mk
 -include source/RingBuffer/subdir.mk
 -include source/Logger/subdir.mk
 -include source/LED/subdir.mk

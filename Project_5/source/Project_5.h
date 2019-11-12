@@ -5,8 +5,8 @@
  *      Author: john
  */
 
-#ifndef PROJECT5_H_
-#define PROJECT5_H_
+#ifndef PROJECT_5_H_
+#define PROJECT_5_H_
 
 #define FREEDOM
 #include <stdio.h>
@@ -21,6 +21,7 @@
 #include "fsl_debug_console.h"
 #include "LED/RGB.h"
 #include "Logger/logger.h"
+#include "Test/tests.h"
 
 #define RED_BASE GPIOB
 #define RED_PIN 18U
@@ -33,4 +34,4 @@
 extern LoggerHandle logger;
 extern RGBLEDHandle led;
 
-#endif /* PROJECT5_H_ */
+#endif /* PROJECT_5_H_ */

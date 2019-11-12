@@ -21,6 +21,7 @@ source/LED \
 source/Logger \
 source \
 source/RingBuffer \
+source/Test \
 source/uCUnit \
 startup \
 utilities \
