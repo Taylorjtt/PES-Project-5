@@ -22,6 +22,7 @@ source/Logger \
 source \
 source/RingBuffer \
 source/Test \
+source/UART \
 source/uCUnit \
 startup \
 utilities \

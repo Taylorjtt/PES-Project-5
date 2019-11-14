@@ -11,10 +11,11 @@
 #include "clock_config.h"
 #include "MKL25Z4.h"
 #include "fsl_debug_console.h"
+#include "UART/UART.h"
 
 LoggerHandle logger;
 RGBLEDHandle led;
-
+UARTHandle uart;
 int main(void) {
 
   	/* Init board hardware. */
@@ -33,9 +34,24 @@ int main(void) {
 	logger = Logger_Constructor((void*)logger, sizeof(LOGGERObject));
 	Logger_enable(logger);
 
+	uart = malloc(sizeof(UART_OBJ));
+	uart = UART_constructor((void *)UART0_BASE, sizeof(UART_OBJ),24000,115200);
+
 #ifdef TEST
 	testRingBuffer();
 	exit(0);
 #endif
+
+
+#ifdef ECHO
+	while(true)
+	{
+		if(UART_rxAvailable(uart))
+		{
+			UART_putChar(uart, UART_getChar(uart));
+		}
+	}
+#endif
+
 
 }
