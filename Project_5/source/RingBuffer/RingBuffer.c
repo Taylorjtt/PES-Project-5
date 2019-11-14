@@ -48,11 +48,21 @@ BUFFER_ERROR RingBuffer_push(RingBufferHandle handle, uint8_t data)
 	{
 
 		START_CRITICAL;
+		//on overflow, head is equal to tail
+		size_t tailOffset = obj->tail - obj->buffer;
 
-		obj->buffer = realloc(obj->buffer,sizeof(obj->buffer)*2);
+
+		//we need to resize the buffer and move
+		size_t headOffset = tailOffset + obj->length;
+		uint8_t* newBuffer = realloc(obj->buffer,obj->length*2);
+		obj->buffer = newBuffer;
+
+		memcpy((obj->buffer + obj->length),obj->buffer, tailOffset);
+
+
 		//set the head and tail based on offsets
-		obj->head = obj->buffer + obj->length + 1;
-		obj->tail = obj->buffer + obj->length;
+		obj->head = obj->buffer + headOffset;
+		obj->tail = obj->buffer + tailOffset;
 		obj->length = obj->length * 2;
 		*(obj->head) = data;
 		obj->head++;

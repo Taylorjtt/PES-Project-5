@@ -61,6 +61,11 @@ void testRingBuffer(void)
 	{
 		RingBuffer_push(ring, i);
 	}
+	for(int i = 0; i < 20; i++)
+	{
+		UCUNIT_CheckIsEqual(RingBuffer_peek(ring),i);
+		RingBuffer_pop(ring);
+	}
 
 
 	UCUNIT_TestcaseEnd();

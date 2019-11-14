@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "util.h"
+#include <string.h>
 
 typedef enum {BUFFER_FULL_ERROR,BUFFER_EMPTY_ERROR, NO_ERROR}BUFFER_ERROR;
 
