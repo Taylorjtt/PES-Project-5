@@ -7,7 +7,7 @@
 
 #ifndef UART_UART_H_
 #define UART_UART_H_
-
+#define INTERRUPT
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>

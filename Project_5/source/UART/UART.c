@@ -38,6 +38,10 @@ UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t system
    //Enable rx and tx
    uart->CONTROL_2|= (UART_C2_TE_MASK| UART_C2_RE_MASK );
 
+#ifdef INTERRUPT
+   	   //enable interrupt
+   	  uart->CONTROL_2 |= UART_C2_RIE_MASK;
+#endif
 
 	return(uartHandle);
 }
@@ -85,3 +89,12 @@ bool UART_rxAvailable(UARTHandle handle)
 		return false;
 	}
 }
+
+#ifdef INTERRUPT
+void UART0_IRQHandler (void)
+{
+	UARTHandle uartHandle = (UARTHandle)UART0_BASE;
+	UART_OBJ *uart = (UART_OBJ *)uartHandle;
+
+}
+#endif
