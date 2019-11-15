@@ -17,7 +17,7 @@
  *
  */
 #include "logger.h"
-LoggerHandle Logger_Constructor(void *pmemory, const size_t numbytes)
+LoggerHandle Logger_Constructor(void *pmemory, const size_t numbytes, UARTHandle uart)
 {
 	LoggerHandle handle;
 	LOGGERObject *obj;
@@ -31,6 +31,7 @@ LoggerHandle Logger_Constructor(void *pmemory, const size_t numbytes)
 	handle = (LoggerHandle)pmemory;
 	obj = (LOGGERObject *)handle;
 	obj->status = DISABLED;
+	obj->uart = uart;
 	return handle;
 }
 void Logger_enable(LoggerHandle handle)
@@ -55,19 +56,23 @@ void Logger_logData(LoggerHandle handle, uint8_t* loc, size_t length,const char*
 	{
 		for(int i = 0; i < length; i++)
 		{
+			UART_printf(obj->uart, "------------------------------------------------------------------\n\r");
+			Logger_logTime(handle);
 			uintptr_t address = (uintptr_t)(loc + i);
-			#ifdef FREEDOM
-			PRINTF("In function %s()\n\r",function);
-			PRINTF("%s: Address: %02X\tData:%X\n\r",getLevelString(level),address,loc[i]);
-			#else
-			printf("LOGGER: Address: %02X\tData:%X\n\r",(uint32_t)address,loc[i]);
-			#endif
+			UART_printf(obj->uart,"In function %s()\n\r",function);
+			UART_printf(obj->uart,"%s: Address: %02X\tData:%X\n\r",getLevelString(level),address,loc[i]);
 		}
-		#ifdef FREEDOM
-			PRINTF("\n\r");
-		#else
-			printf("\n\r");
-		#endif
+
+		UART_printf(obj->uart,"\n\r");
+
+	}
+}
+void Logger_logTime(LoggerHandle handle)
+{
+	LOGGERObject *obj = (LOGGERObject *)handle;
+	if(obj->status == ENABLED)
+	{
+		UART_printf(obj->uart,"%d:%d:%d.%d\n\r",time.hours,time.minutes,time.seconds,time.tenths);
 	}
 }
 void Logger_logString(LoggerHandle handle, const char * string,const char* function, LOG_LEVEL level)
@@ -75,9 +80,10 @@ void Logger_logString(LoggerHandle handle, const char * string,const char* funct
 	LOGGERObject *obj = (LOGGERObject *)handle;
 	if(obj->status == ENABLED)
 	{
-		PRINTF("------------------------------------------------------------------\n\r");
-		PRINTF("In function %s()\n\r",function);
-		PRINTF("%s: %s\n\r",getLevelString(level),string);
+		UART_printf(obj->uart,"------------------------------------------------------------------\n\r");
+		Logger_logTime(handle);
+		UART_printf(obj->uart,"In function %s()\n\r",function);
+		UART_printf(obj->uart,"%s: %s\n\r",getLevelString(level),string);
 	}
 }
 void Logger_logTemps(LoggerHandle handle, float currentTemp,float averageTemp,const char* function, LOG_LEVEL level)
@@ -86,23 +92,23 @@ void Logger_logTemps(LoggerHandle handle, float currentTemp,float averageTemp,co
 	if(obj->status == ENABLED)
 	{
 
-		PRINTF("------------------------------------------------------------------\n\r");
-		PRINTF("In function %s()\n\r",function);
+		UART_printf(obj->uart,"------------------------------------------------------------------\n\r");
+		UART_printf(obj->uart,"In function %s()\n\r",function);
 		if(averageTemp > 0 && currentTemp > 0)
 		{
-			PRINTF("%s: Temperature Reading\n\rCurrent Temp: %f C\n\rAverage Temp %f C\n\r",getLevelString(level),currentTemp,averageTemp);
+			UART_printf(obj->uart,"%s: Temperature Reading\n\rCurrent Temp: %f C\n\rAverage Temp %f C\n\r",getLevelString(level),currentTemp,averageTemp);
 		}
 		if(averageTemp > 0 && currentTemp < 0)
 		{
-			PRINTF("%s: Temperature Reading\n\rCurrent Temp: -%f C\n\rAverage Temp %f C\n\r",getLevelString(level),currentTemp,averageTemp);
+			UART_printf(obj->uart,"%s: Temperature Reading\n\rCurrent Temp: -%f C\n\rAverage Temp %f C\n\r",getLevelString(level),currentTemp,averageTemp);
 		}
 		if(averageTemp < 0 && currentTemp > 0)
 		{
-			PRINTF("%s: Temperature Reading\n\rCurrent Temp: %f C\n\rAverage Temp -%f C\n\r",getLevelString(level),currentTemp,averageTemp);
+			UART_printf(obj->uart,"%s: Temperature Reading\n\rCurrent Temp: %f C\n\rAverage Temp -%f C\n\r",getLevelString(level),currentTemp,averageTemp);
 		}
 		if(averageTemp <= 0 && currentTemp <= 0)
 		{
-			PRINTF("%s: Temperature Reading\n\rCurrent Temp: -%f C\n\rAverage Temp -%f C\n\r",getLevelString(level),currentTemp,averageTemp);
+			UART_printf(obj->uart,"%s: Temperature Reading\n\rCurrent Temp: -%f C\n\rAverage Temp -%f C\n\r",getLevelString(level),currentTemp,averageTemp);
 		}
 
 	}
@@ -114,9 +120,10 @@ void Logger_logInt(LoggerHandle handle, uint8_t num,const char* function, LOG_LE
 	LOGGERObject *obj = (LOGGERObject *)handle;
 	if(obj->status == ENABLED)
 	{
-		PRINTF("------------------------------------------------------------------\n\r");
-		PRINTF("In function %s()\n\r",function);
-		PRINTF("%s: %d\n\r",getLevelString(level),num);
+		UART_printf(obj->uart,"------------------------------------------------------------------\n\r");
+		Logger_logTime(handle);
+		UART_printf(obj->uart,"In function %s()\n\r",function);
+		UART_printf(obj->uart,"%s: %d\n\r",getLevelString(level),num);
 	}
 }
 const char* getLevelString(LOG_LEVEL level)

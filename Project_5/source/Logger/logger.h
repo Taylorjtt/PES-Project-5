@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "UART/UART.h"
+#include "util.h"
 #ifdef FREEDOM
 #include "fsl_debug_console.h"
 #endif
@@ -32,6 +34,7 @@ typedef enum {TEST_LEVEL,DEBUG_LEVEL,STATUS_LEVEL}LOG_LEVEL;
 typedef struct LOGGER_OBJ
 {
 	LOGGER_STATUS status;
+	UARTHandle uart;
 }LOGGERObject;
 
 typedef struct LOGGER_OBJ *LoggerHandle;
@@ -45,7 +48,7 @@ typedef struct LOGGER_OBJ *LoggerHandle;
 * @param numbytes	The expected size of the object
 * @return LoggerHandle a pointer to an LoggerObject
 */
-LoggerHandle Logger_Constructor(void *pmemory, const size_t numbytes);
+LoggerHandle Logger_Constructor(void *pmemory, const size_t numbytes, UARTHandle uart);
 
 /**
 * @brief Function to enable the logger
@@ -81,6 +84,7 @@ void Logger_logData(LoggerHandle handle, uint8_t* loc, size_t length,const char*
 * @param string		string to log
 */
 void Logger_logString(LoggerHandle handle, const char * string, const char* function,LOG_LEVEL level);
+void Logger_logTime(LoggerHandle handle);
 /**
 * @brief Log an integer
 *

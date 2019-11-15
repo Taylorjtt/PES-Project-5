@@ -28,6 +28,11 @@ RingBufferHandle RingBuffer_Constructor(void *pmemory, const size_t numbytes, co
 
 }
 
+size_t RingBuffer_getSize(RingBufferHandle handle)
+{
+	RingBufferObject *obj = (RingBufferObject *)handle;
+	return obj->length;
+}
 BUFFER_ERROR RingBuffer_push(RingBufferHandle handle, uint8_t data)
 {
 	RingBufferObject *obj = (RingBufferObject *)handle;
@@ -46,7 +51,6 @@ BUFFER_ERROR RingBuffer_push(RingBufferHandle handle, uint8_t data)
 	}
 	else
 	{
-
 		START_CRITICAL;
 		//on overflow, head is equal to tail
 		size_t tailOffset = obj->tail - obj->buffer;

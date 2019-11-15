@@ -17,11 +17,13 @@
 #include "RingBuffer/RingBuffer.h"
 #include "LED/RGB.h"
 #include "mode.h"
+#include <stdarg.h>
+
 
 extern volatile RingBufferHandle rxRing;
 extern volatile RingBufferHandle txRing;
-extern volatile bool transmitReady;
 
+extern volatile bool txBufferFull;
 typedef struct _UART_OBJ_
 {
 	__IO uint8_t BAUD_HIGH;
@@ -45,6 +47,8 @@ UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t system
 uint8_t UART_getChar(UARTHandle handle);
 void UART_putChar(UARTHandle handle, uint8_t c);
 bool UART_txAvailable(UARTHandle handle);
+void UART_printf(UARTHandle handle, const char*, ...);
+char *convert(unsigned int num, int base);
 bool UART_rxAvailable(UARTHandle handle);
 void UART_queueChar(UARTHandle handle,char c);
 void UART_enableTXInterrupt(UARTHandle handle);

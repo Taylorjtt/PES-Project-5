@@ -34,5 +34,6 @@
 #define ESCAPE_CHARACTER 27
 extern LoggerHandle logger;
 extern RGBLEDHandle led;
+extern UARTHandle uart;
 
 #endif /* PROJECT_5_H_ */

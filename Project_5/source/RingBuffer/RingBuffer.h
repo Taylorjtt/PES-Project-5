@@ -33,7 +33,7 @@ RingBufferHandle RingBuffer_Constructor(void *pmemory, const size_t numbytes, co
 BUFFER_ERROR RingBuffer_push(RingBufferHandle handle, uint8_t data);
 BUFFER_ERROR RingBuffer_pop(RingBufferHandle handle);
 uint8_t RingBuffer_peek(RingBufferHandle handle);
-
+size_t RingBuffer_getSize(RingBufferHandle handle);
 bool RingBuffer_isFull(RingBufferHandle handle);
 bool RingBuffer_isEmpty(RingBufferHandle handle);
 bool RingBuffer_isInitialized(RingBufferHandle handle);
