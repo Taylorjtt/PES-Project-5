@@ -31,6 +31,7 @@
 
 #define BLUE_BASE GPIOD
 #define BLUE_PIN 1U
+#define ESCAPE_CHARACTER 27
 extern LoggerHandle logger;
 extern RGBLEDHandle led;
 

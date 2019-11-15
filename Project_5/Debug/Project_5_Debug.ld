@@ -6,7 +6,7 @@
  * Generated linker script file for MKL25Z128xxx4
  * Created from linkscript.ldt by FMCreateLinkLibraries
  * Using Freemarker v2.3.23
- * MCUXpresso IDE v11.0.1 [Build 2563] [2019-09-01] on Nov 14, 2019 8:31:48 PM
+ * MCUXpresso IDE v11.0.1 [Build 2563] [2019-09-01] on Nov 15, 2019 10:23:47 AM
  */
 
 INCLUDE "Project_5_Debug_library.ld"
@@ -132,7 +132,7 @@ SECTIONS
     } > SRAM
 
     /* Reserve and place Heap within memory map */
-    _HeapSize = 0x400;
+    _HeapSize = 0x800;
     .heap :  ALIGN(4)
     {
         _pvHeapStart = .;

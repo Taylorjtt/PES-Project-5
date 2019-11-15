@@ -18,6 +18,8 @@
 #include "mode.h"
 
 extern volatile RingBufferHandle rxRing;
+extern volatile RingBufferHandle txRing;
+extern volatile bool transmitReady;
 
 typedef struct _UART_OBJ_
 {
@@ -45,5 +47,7 @@ bool UART_txAvailable(UARTHandle handle);
 bool UART_rxAvailable(UARTHandle handle);
 void UART_queueChar(UARTHandle handle,char c);
 void UART_enableTXInterrupt(UARTHandle handle);
+void UART_disableTXInterrupt(UARTHandle handle);
 void UART_queueString(UARTHandle handle,char* string);
+bool UART_transmitComplete(UARTHandle handle);
 #endif /* UART_UART_H_ */

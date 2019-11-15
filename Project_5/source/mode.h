@@ -13,6 +13,6 @@
 //#define ECHO
 #define APPLICATION
 
-#define INTERRUPT
+//#define INTERRUPT
 
 #endif /* MODE_H_ */

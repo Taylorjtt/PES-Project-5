@@ -111,17 +111,30 @@ void UART_queueString(UARTHandle handle,char* string)
 	int i = 0;
 	while(string[i] != '\0')
 	{
-		RingBuffer_push(txRing, string[i++]);
+		UART_queueChar(handle, string[i++]);
 	}
 }
 void UART_queueChar(UARTHandle handle,char c)
 {
 	RingBuffer_push(txRing, c);
+	#ifdef INTERRUPT
+	UART_enableTXInterrupt(handle);
+	#endif
+}
+bool UART_transmitComplete(UARTHandle handle)
+{
+	UART_OBJ *uart = (UART_OBJ *)handle;
+	return uart->STATUS_1 & UART0_S1_TC_MASK;
 }
 void UART_enableTXInterrupt(UARTHandle handle)
 {
 	UART_OBJ *uart = (UART_OBJ *)handle;
 	uart->CONTROL_2 |=  UART_C2_TIE_MASK;
+}
+void UART_disableTXInterrupt(UARTHandle handle)
+{
+	UART_OBJ *uart = (UART_OBJ *)handle;
+	uart->CONTROL_2 &= ~UART_C2_TIE_MASK;
 }
 
 #ifdef INTERRUPT
@@ -131,7 +144,7 @@ void UART0_IRQHandler (void)
 	UARTHandle uartHandle = (UARTHandle)UART0_BASE;
 	UART_OBJ *uart = (UART_OBJ *)uartHandle;
 
-	if(uart->STATUS_1 & UART_S1_RDRF_MASK)
+	if(uart->STATUS_1 & UART_S1_RDRF_MASK && uart->CONTROL_2 & UART_C2_RIE_MASK)
 	{
 		//the recieve data buffer is full (there is a byte to grab)
 		#ifdef ECHO
@@ -145,7 +158,7 @@ void UART0_IRQHandler (void)
 
 	}
 
-	if(uart->STATUS_1 & UART_S1_TDRE_MASK)
+	if(uart->STATUS_1 & UART_S1_TDRE_MASK && uart->CONTROL_2 & UART_C2_TIE_MASK)
 	{
 		//the transmit data register is empty (we are free to send another byte)
 		#ifdef ECHO
@@ -156,22 +169,14 @@ void UART0_IRQHandler (void)
 			}
 		#endif
 		#ifdef APPLICATION
-			if(!RingBuffer_isEmpty(txRing))
-			{
-				while(!RingBuffer_isEmpty(txRing))
-				{
-
-					UART_putChar(uart, RingBuffer_peek(txRing));
-
-					while(!(uart->STATUS_1 & UART0_S1_TC_MASK));
-
-					RingBuffer_pop(txRing);
-				}
-
-			}
+			//put the latest character on the bus
+			UART_putChar(uart, RingBuffer_peek(txRing));
+			//wait for the transmission to complete
+			while(!(UART_transmitComplete(uart)));
+			//pop the sent value off of the tx buffer
+			RingBuffer_pop(txRing);
 			//disable the tx ready interrupt
 			uart->CONTROL_2 &= ~UART_C2_TIE_MASK;
-
 		#endif
 
 
