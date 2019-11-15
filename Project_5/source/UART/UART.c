@@ -7,6 +7,10 @@
 
 
 #include "UART.h"
+
+volatile uint8_t nextByte;
+volatile bool newData = false;
+
 UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t systemClock, uint32_t baud)
 {
 	UARTHandle uartHandle;
@@ -40,7 +44,9 @@ UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t system
 
 #ifdef INTERRUPT
    	   //enable interrupt
-   	  uart->CONTROL_2 |= UART_C2_RIE_MASK;
+   	   EnableInterrupts;
+   	   NVIC_EnableIRQ(UART0_IRQn);
+   	   uart->CONTROL_2 |= UART_C2_RIE_MASK | UART_C2_TIE_MASK;
 #endif
 
 	return(uartHandle);
@@ -49,20 +55,19 @@ UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t system
 uint8_t UART_getChar(UARTHandle handle)
 {
 	UART_OBJ *uart = (UART_OBJ *)handle;
-
-    while (!(uart->STATUS_1 & UART_S1_RDRF_MASK));
-
+	#ifndef INTERRUPT
+		while (!UART_rxAvailable(uart));
+	#endif
     return uart->DATA;
 }
 
 void UART_putChar(UARTHandle handle, uint8_t c)
 {
 	UART_OBJ *uart = (UART_OBJ *)handle;
-
-      while(!(uart->STATUS_1 & UART_S1_TDRE_MASK));
-
-
-      uart->DATA = (uint8_t)c;
+	#ifndef INTERRUPT
+		while(!UART_txAvailable(uart));
+	#endif
+	uart->DATA = (uint8_t)c;
 
  }
 bool UART_txAvailable(UARTHandle handle)
@@ -95,6 +100,27 @@ void UART0_IRQHandler (void)
 {
 	UARTHandle uartHandle = (UARTHandle)UART0_BASE;
 	UART_OBJ *uart = (UART_OBJ *)uartHandle;
+
+	if(uart->STATUS_1 & UART_S1_RDRF_MASK)
+	{
+		//the recieve data buffer is full (there is a byte to grab)
+		nextByte = UART_getChar(uart);
+		newData = true;
+
+	}
+
+	if(uart->STATUS_1 & UART_S1_TDRE_MASK)
+	{
+		//the transmit data register is empty (we are free to send another byte)
+		if(newData)
+		{
+			UART_putChar(uart, nextByte);
+			newData = false;
+		}
+
+
+	}
+
 
 }
 #endif

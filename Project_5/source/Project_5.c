@@ -44,13 +44,17 @@ int main(void) {
 
 
 #ifdef ECHO
-	while(true)
-	{
-		if(UART_rxAvailable(uart))
+	#ifndef INTERRUPT
+		while(true)
 		{
 			UART_putChar(uart, UART_getChar(uart));
 		}
-	}
+	#else
+		while(true)
+		{
+
+		}
+	#endif
 #endif
 
 
