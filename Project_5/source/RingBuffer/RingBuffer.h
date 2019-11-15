@@ -22,8 +22,8 @@ typedef struct RING_BUFF_OBJ
 	uint8_t * buffer;
 	uint8_t * head;
 	uint8_t * tail;
-	size_t length;
-	size_t count;
+	uint32_t length;
+	uint32_t count;
 }RingBufferObject;
 
 typedef struct RING_BUFF_OBJ *RingBufferHandle;

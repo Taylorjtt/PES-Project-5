@@ -10,7 +10,9 @@
 
 //#define TEST
 //#define DB
-#define ECHO
+//#define ECHO
+#define APPLICATION
 
+#define INTERRUPT
 
 #endif /* MODE_H_ */

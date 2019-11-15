@@ -18,12 +18,12 @@
  */
 
 #include "tests.h"
-
+#ifdef TEST
 RingBufferHandle ring;
-
+#endif
 void testRingBuffer(void)
 {
-
+#ifdef TEST
 	UCUNIT_TestcaseBegin("Testing RingBuffer");
 	ring = malloc(sizeof(RingBufferObject));
 	RingBuffer_Constructor((void*)ring, sizeof(RingBufferObject), 3);
@@ -69,4 +69,5 @@ void testRingBuffer(void)
 
 
 	UCUNIT_TestcaseEnd();
+#endif
 }

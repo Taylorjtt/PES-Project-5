@@ -10,6 +10,9 @@
 
 volatile uint8_t nextByte;
 volatile bool newData = false;
+volatile RingBufferHandle rxRing;
+volatile RingBufferHandle txRing;
+volatile bool transmitReady = false;
 
 UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t systemClock, uint32_t baud)
 {
@@ -40,13 +43,22 @@ UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t system
 	uart->BAUD_LOW = (uint8_t)(sysBaud & UART_BDL_SBR_MASK);
 
    //Enable rx and tx
-   uart->CONTROL_2|= (UART_C2_TE_MASK| UART_C2_RE_MASK );
+   uart->CONTROL_2 |= UART_C2_RE_MASK | UART_C2_TE_MASK;
+
+
+	#ifdef APPLICATION
+   	   rxRing = malloc(sizeof(RingBufferObject));
+   	   RingBuffer_Constructor((void*)rxRing, sizeof(RingBufferObject), 4);
+
+   	   txRing = malloc(sizeof(RingBufferObject));
+   	   RingBuffer_Constructor((void*)txRing, sizeof(RingBufferObject), 4);
+	#endif
 
 #ifdef INTERRUPT
    	   //enable interrupt
    	   EnableInterrupts;
    	   NVIC_EnableIRQ(UART0_IRQn);
-   	   uart->CONTROL_2 |= UART_C2_RIE_MASK | UART_C2_TIE_MASK;
+   	   uart->CONTROL_2 |= UART_C2_RIE_MASK;
 #endif
 
 	return(uartHandle);
@@ -94,33 +106,77 @@ bool UART_rxAvailable(UARTHandle handle)
 		return false;
 	}
 }
+void UART_queueString(UARTHandle handle,char* string)
+{
+	int i = 0;
+	while(string[i] != '\0')
+	{
+		RingBuffer_push(txRing, string[i++]);
+	}
+}
+void UART_queueChar(UARTHandle handle,char c)
+{
+	RingBuffer_push(txRing, c);
+}
+void UART_enableTXInterrupt(UARTHandle handle)
+{
+	UART_OBJ *uart = (UART_OBJ *)handle;
+	uart->CONTROL_2 |=  UART_C2_TIE_MASK;
+}
 
 #ifdef INTERRUPT
 void UART0_IRQHandler (void)
 {
+	DisableInterrupts;
 	UARTHandle uartHandle = (UARTHandle)UART0_BASE;
 	UART_OBJ *uart = (UART_OBJ *)uartHandle;
 
 	if(uart->STATUS_1 & UART_S1_RDRF_MASK)
 	{
 		//the recieve data buffer is full (there is a byte to grab)
-		nextByte = UART_getChar(uart);
-		newData = true;
+		#ifdef ECHO
+			nextByte = UART_getChar(uart);
+			newData = true;
+		#endif
+		#ifdef APPLICATION
+			RingBuffer_push(rxRing, UART_getChar(uart));
+			newData = true;
+		#endif
 
 	}
 
 	if(uart->STATUS_1 & UART_S1_TDRE_MASK)
 	{
 		//the transmit data register is empty (we are free to send another byte)
-		if(newData)
-		{
-			UART_putChar(uart, nextByte);
-			newData = false;
-		}
+		#ifdef ECHO
+			if(newData)
+			{
+				UART_putChar(uart, nextByte);
+				newData = false;
+			}
+		#endif
+		#ifdef APPLICATION
+			if(!RingBuffer_isEmpty(txRing))
+			{
+				while(!RingBuffer_isEmpty(txRing))
+				{
+
+					UART_putChar(uart, RingBuffer_peek(txRing));
+
+					while(!(uart->STATUS_1 & UART0_S1_TC_MASK));
+
+					RingBuffer_pop(txRing);
+				}
+				//disable the tx ready interrupt
+			}
+			uart->CONTROL_2 &= ~UART_C2_TIE_MASK;
+
+		#endif
+
 
 
 	}
-
+	EnableInterrupts;
 
 }
 #endif

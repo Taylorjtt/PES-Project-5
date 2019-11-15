@@ -12,19 +12,23 @@
 #include "MKL25Z4.h"
 #include "fsl_debug_console.h"
 #include "UART/UART.h"
+#include <ctype.h>
 
 LoggerHandle logger;
 RGBLEDHandle led;
 UARTHandle uart;
+
+uint8_t count[128] = {0};
+
 int main(void) {
 
-  	/* Init board hardware. */
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
-  	/* Init FSL debug console. */
-    BOARD_InitDebugConsole();
-    SysTick_Config(480);
+	/* Init board hardware. */
+	BOARD_InitBootPins();
+	BOARD_InitBootClocks();
+	BOARD_InitBootPeripherals();
+	/* Init FSL debug console. */
+	BOARD_InitDebugConsole();
+	SysTick_Config(480);
 
 	led = malloc(sizeof(RGBLEDObject));
 	led = RGBLED_Constructor((void*) led, sizeof(RGBLEDObject), RED_BASE, RED_PIN, GREEN_BASE, GREEN_PIN, BLUE_BASE, BLUE_PIN);
@@ -37,6 +41,8 @@ int main(void) {
 	uart = malloc(sizeof(UART_OBJ));
 	uart = UART_constructor((void *)UART0_BASE, sizeof(UART_OBJ),24000,115200);
 
+
+
 #ifdef TEST
 	testRingBuffer();
 	exit(0);
@@ -44,18 +50,59 @@ int main(void) {
 
 
 #ifdef ECHO
-	#ifndef INTERRUPT
-		while(true)
-		{
-			UART_putChar(uart, UART_getChar(uart));
-		}
-	#else
-		while(true)
-		{
+#ifndef INTERRUPT
+	while(true)
+	{
+		UART_putChar(uart, UART_getChar(uart));
+	}
+#else
+	while(true)
+	{
 
-		}
-	#endif
+	}
+#endif
 #endif
 
+#ifdef APPLICATION
+#ifndef INTERRUPT
+	while(true)
+	{
+		UART_putChar(uart, UART_getChar(uart));
+	}
+#else
+	while(true)
+	{
 
+
+		if(!RingBuffer_isEmpty(rxRing))
+		{
+			uint8_t data = RingBuffer_peek(rxRing);
+			if(isalnum(data) || ispunct(data))
+			{
+				count[data]++;
+			}
+			else if(data == 27)
+			{
+				for(int i = 0; i < 128; i++)
+				{
+					if(count[i] > 0)
+					{
+
+						UART_queueChar(uart, (char)i);
+						UART_queueString(uart," - ");
+						char num[5];
+						sprintf(num, "%d", count[i]);
+						UART_queueString(uart, num);
+						UART_queueString(uart, ", ");
+						UART_enableTXInterrupt(uart);
+					}
+
+				}
+
+			}
+			RingBuffer_pop(rxRing);
+		}
+	}
+#endif
+#endif
 }

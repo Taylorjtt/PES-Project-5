@@ -7,13 +7,17 @@
 
 #ifndef UART_UART_H_
 #define UART_UART_H_
-#define INTERRUPT
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include "CMSIS/MKL25Z4.h"
 #include "CMSIS/core_cm0plus.h"
 #include "util.h"
+#include "RingBuffer/RingBuffer.h"
+#include "mode.h"
+
+extern volatile RingBufferHandle rxRing;
 
 typedef struct _UART_OBJ_
 {
@@ -39,4 +43,7 @@ uint8_t UART_getChar(UARTHandle handle);
 void UART_putChar(UARTHandle handle, uint8_t c);
 bool UART_txAvailable(UARTHandle handle);
 bool UART_rxAvailable(UARTHandle handle);
+void UART_queueChar(UARTHandle handle,char c);
+void UART_enableTXInterrupt(UARTHandle handle);
+void UART_queueString(UARTHandle handle,char* string);
 #endif /* UART_UART_H_ */
