@@ -167,8 +167,9 @@ void UART0_IRQHandler (void)
 
 					RingBuffer_pop(txRing);
 				}
-				//disable the tx ready interrupt
+
 			}
+			//disable the tx ready interrupt
 			uart->CONTROL_2 &= ~UART_C2_TIE_MASK;
 
 		#endif

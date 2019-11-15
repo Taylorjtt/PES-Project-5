@@ -18,7 +18,7 @@ LoggerHandle logger;
 RGBLEDHandle led;
 UARTHandle uart;
 
-uint8_t count[128] = {0};
+uint32_t count[128] = {0};
 
 int main(void) {
 
@@ -83,21 +83,33 @@ int main(void) {
 			}
 			else if(data == 27)
 			{
+				UART_queueString(uart, "\n\r");
+				UART_queueString(uart, "Begin Report");
+				UART_queueString(uart, "\n\r");
 				for(int i = 0; i < 128; i++)
 				{
 					if(count[i] > 0)
 					{
-
+						UART_queueChar(uart, '[');
 						UART_queueChar(uart, (char)i);
 						UART_queueString(uart," - ");
 						char num[5];
 						sprintf(num, "%d", count[i]);
 						UART_queueString(uart, num);
-						UART_queueString(uart, ", ");
+						UART_queueChar(uart, ']');
+						if(i != 127)
+						{
+							UART_queueString(uart, ", ");
+						}
+
 						UART_enableTXInterrupt(uart);
 					}
 
 				}
+				UART_queueString(uart, "\n\r");
+				UART_queueString(uart, "End Report");
+				UART_queueString(uart, "\n\r");
+				UART_enableTXInterrupt(uart);
 
 			}
 			RingBuffer_pop(rxRing);
