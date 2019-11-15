@@ -33,14 +33,14 @@ int main(void) {
 
 	led = malloc(sizeof(RGBLEDObject));
 	led = RGBLED_Constructor((void*) led, sizeof(RGBLEDObject), RED_BASE, RED_PIN, GREEN_BASE, GREEN_PIN, BLUE_BASE, BLUE_PIN);
-	RGBLED_set(led, false, false, false);
+	RGBLED_set(led, false, false, true);
 
 	logger = malloc(sizeof(LOGGERObject));
 	logger = Logger_Constructor((void*)logger, sizeof(LOGGERObject));
 	Logger_enable(logger);
 
 	uart = malloc(sizeof(UART_OBJ));
-	uart = UART_constructor((void *)UART0_BASE, sizeof(UART_OBJ),24000,115200);
+	uart = UART_constructor((void *)UART0_BASE, sizeof(UART_OBJ),24000,115200,led);
 
 
 
@@ -116,6 +116,7 @@ int main(void) {
 
 		if(!RingBuffer_isEmpty(txRing))
 		{
+			RGBLED_set(led, false, true, false);
 			#ifdef INTERRUPT
 			UART_enableTXInterrupt(uart);
 			#else
@@ -123,6 +124,10 @@ int main(void) {
 			RingBuffer_pop(txRing);
 			#endif
 
+		}
+		else
+		{
+			RGBLED_set(led, false, false, true);
 		}
 
 	}

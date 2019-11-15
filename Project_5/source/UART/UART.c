@@ -13,8 +13,9 @@ volatile bool newData = false;
 volatile RingBufferHandle rxRing;
 volatile RingBufferHandle txRing;
 volatile bool transmitReady = false;
+RGBLEDHandle ledHandle;
 
-UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t systemClock, uint32_t baud)
+UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t systemClock, uint32_t baud, RGBLEDHandle led)
 {
 	UARTHandle uartHandle;
 
@@ -44,7 +45,7 @@ UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t system
 
    //Enable rx and tx
    uart->CONTROL_2 |= UART_C2_RE_MASK | UART_C2_TE_MASK;
-
+   ledHandle = led;
 
 	#ifdef APPLICATION
    	   rxRing = malloc(sizeof(RingBufferObject));
@@ -67,6 +68,7 @@ UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t system
 uint8_t UART_getChar(UARTHandle handle)
 {
 	UART_OBJ *uart = (UART_OBJ *)handle;
+	RGBLED_set(ledHandle, false, false, true);
 	#ifndef INTERRUPT
 		while (!UART_rxAvailable(uart));
 	#endif
@@ -76,6 +78,7 @@ uint8_t UART_getChar(UARTHandle handle)
 void UART_putChar(UARTHandle handle, uint8_t c)
 {
 	UART_OBJ *uart = (UART_OBJ *)handle;
+	RGBLED_set(ledHandle, false, true, false);
 	#ifndef INTERRUPT
 		while(!UART_txAvailable(uart));
 	#endif

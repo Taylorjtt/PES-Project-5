@@ -15,6 +15,7 @@
 #include "CMSIS/core_cm0plus.h"
 #include "util.h"
 #include "RingBuffer/RingBuffer.h"
+#include "LED/RGB.h"
 #include "mode.h"
 
 extern volatile RingBufferHandle rxRing;
@@ -40,7 +41,7 @@ typedef struct _UART_OBJ_
 }UART_OBJ;
 
 typedef struct _UART_OBJ_ *UARTHandle;
-UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t systemClock, uint32_t baud);
+UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t systemClock, uint32_t baud, RGBLEDHandle led);
 uint8_t UART_getChar(UARTHandle handle);
 void UART_putChar(UARTHandle handle, uint8_t c);
 bool UART_txAvailable(UARTHandle handle);
