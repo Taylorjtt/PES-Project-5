@@ -10,7 +10,6 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "MKL25Z4.h"
-#include "fsl_debug_console.h"
 #include "UART/UART.h"
 #include <ctype.h>
 
@@ -29,6 +28,8 @@ int main(void) {
 	BOARD_InitBootPeripherals();
 	/* Init FSL debug console. */
 	BOARD_InitDebugConsole();
+
+#ifndef TEST
 	//10hz
 	SysTick_Config(4800000);
 
@@ -45,7 +46,7 @@ int main(void) {
 	logger = Logger_Constructor((void*)logger, sizeof(LOGGERObject), uart);
 	Logger_enable(logger);
 	Logger_logString(logger, "Program Started", "main", STATUS_LEVEL);
-
+#endif
 
 
 #ifdef TEST
@@ -81,8 +82,10 @@ int main(void) {
 		#ifndef INTERRUPT
 		if(RingBuffer_push(rxRing, UART_getChar(uart))== BUFFER_FULL_ERROR)
 		{
+			#ifdef DB
 			Logger_logString(logger, "Receive Buffer has been resized", "main", STATUS_LEVEL);
 			UART_printf(uart, "New size is : %d Bytes\n\r",RingBuffer_getSize(rxRing));
+			#endif
 		}
 		#endif
 		//if the receive buffer isn't empty process the data in it
@@ -95,6 +98,7 @@ int main(void) {
 			{
 				//if its alphanumeric or punctuation add it to the count data structure
 				//that keeps track of how many times a particular character has been received
+
 				count[data]++;
 			}
 			else if(data == ESCAPE_CHARACTER)
@@ -140,8 +144,10 @@ int main(void) {
 		if(txBufferFull)
 		{
 			txBufferFull = false;
+			#ifdef DB
 			Logger_logString(logger, "Transmit Buffer has been resized", "main", STATUS_LEVEL);
 			UART_printf(uart, "New size is : %d Bytes\n\r",RingBuffer_getSize(txRing));
+			#endif
 		}
 
 	}

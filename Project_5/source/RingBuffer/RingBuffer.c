@@ -24,6 +24,7 @@ RingBufferHandle RingBuffer_Constructor(void *pmemory, const size_t numbytes, co
 	obj->head = obj->buffer;
 	obj->tail = obj->buffer;
 	obj->length = bufferSize;
+	obj->isInitialized = true;
 	return handle;
 
 }
@@ -128,6 +129,7 @@ bool RingBuffer_isFull(RingBufferHandle handle)
 		return false;
 	}
 }
+
 bool RingBuffer_isEmpty(RingBufferHandle handle)
 {
 	RingBufferObject *obj = (RingBufferObject *)handle;
@@ -143,14 +145,13 @@ bool RingBuffer_isEmpty(RingBufferHandle handle)
 bool RingBuffer_isInitialized(RingBufferHandle handle)
 {
 	RingBufferObject *obj = (RingBufferObject *)handle;
-}
-bool RingBuffer_isValid(RingBufferHandle handle)
-{
-	RingBufferObject *obj = (RingBufferObject *)handle;
+	return obj->isInitialized;
 }
 void RingBuffer_destroy(RingBufferHandle handle)
 {
 	RingBufferObject *obj = (RingBufferObject *)handle;
+	obj->isInitialized = false;
+	free(obj->buffer);
 }
 
 

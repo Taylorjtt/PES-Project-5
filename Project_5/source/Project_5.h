@@ -18,7 +18,6 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "MKL25Z4.h"
-#include "fsl_debug_console.h"
 #include "LED/RGB.h"
 #include "Logger/logger.h"
 #include "Test/tests.h"

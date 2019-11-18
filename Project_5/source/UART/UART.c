@@ -47,13 +47,12 @@ UARTHandle UART_constructor(void *pmemory, const size_t numBytes,uint32_t system
 	uart->CONTROL_2 |= UART_C2_RE_MASK | UART_C2_TE_MASK;
 	ledHandle = led;
 
-#ifdef APPLICATION
 	rxRing = malloc(sizeof(RingBufferObject));
 	RingBuffer_Constructor((void*)rxRing, sizeof(RingBufferObject), 4);
 
 	txRing = malloc(sizeof(RingBufferObject));
 	RingBuffer_Constructor((void*)txRing, sizeof(RingBufferObject), 4);
-#endif
+
 
 #ifdef INTERRUPT
 	//enable interrupt
